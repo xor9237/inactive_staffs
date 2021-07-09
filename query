@@ -1,0 +1,32 @@
+with "data" as
+(select
+    max(timezone('kst', t."updatedAt")) as "last_task"
+    , u."id"
+    , concat('+82 ', u."phoneNumber") as "phoneNumber"
+    , timezone('KST', u."updatedAt")
+    , case when left(lower(u."firstName"),1)
+        in ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z')
+        then concat(u."firstName", ' ', u."lastName")
+        else concat(u."lastName", u."firstName")
+    end as "name"
+    -- , count(distinct t."vehicleId") as "numTasks"
+    , ur."roleId"
+    , r."name"
+from "UserRoles" ur 
+join "admin_users" u on ur."userId" = u."id"
+join "Roles" r on r."id" = ur."roleId"
+left join "Tasks" t on t."assigneeId" = u."id"
+-- where timezone('KST', u."updatedAt")::date <= '07-31-2020'
+where t."status" = 2
+and r."deleted" = false
+and r."countryId" = 51
+and u."deleted" = false
+and ur."roleId" in (25, 26) -- only to include seoul swap rangers
+--and r."name" like '%ranger%'
+--and r."name" not like '%foot%'
+group by 2,3,4,5,6,7)
+-- having count(distinct t."vehicleId") = 0)
+
+select * 
+from "data"
+order by "last_task" asc
